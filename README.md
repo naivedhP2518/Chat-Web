@@ -177,9 +177,7 @@ Chat-Web/
 
 ---
 
-## 📄 License
-
-MIT © 2024 **ChatWave** · Built with ❤️ using the MEAN Stack
+Built with ❤️ using the MEAN Stack
 
 <div align="center">
   <sub>⭐ Star this repo if you found it helpful!</sub>

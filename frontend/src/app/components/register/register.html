@@ -1,0 +1,91 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="14" fill="url(#rLogoGrad)"/>
+          <path d="M10 16C10 13.8 11.8 12 14 12H34C36.2 12 38 13.8 38 16V28C38 30.2 36.2 32 34 32H27L21 37V32H14C11.8 32 10 30.2 10 28V16Z"
+                fill="white" fill-opacity="0.95"/>
+          <circle cx="18" cy="22" r="2" fill="url(#rLogoGrad)"/>
+          <circle cx="24" cy="22" r="2" fill="url(#rLogoGrad)"/>
+          <circle cx="30" cy="22" r="2" fill="url(#rLogoGrad)"/>
+          <defs>
+            <linearGradient id="rLogoGrad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6366f1"/>
+              <stop offset="1" stop-color="#8b5cf6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <h1 class="brand-name">ChatWave</h1>
+      <p class="brand-sub">Join the platform</p>
+    </div>
+
+    <div class="form-header">
+      <h2 class="form-title">Create Account</h2>
+      <p class="form-sub">Start chatting in seconds</p>
+    </div>
+
+    <div class="alert error" *ngIf="error">
+      <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/></svg>
+      {{ error }}
+    </div>
+    <div class="alert success" *ngIf="success">
+      <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+      {{ success }}
+    </div>
+
+    <form (ngSubmit)="register()" #registerForm="ngForm">
+      <div class="field">
+        <label for="username">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z"/></svg>
+          Username
+        </label>
+        <div class="input-wrap">
+          <input id="username" type="text" [(ngModel)]="username" name="username"
+            placeholder="Your display name" autocomplete="username" required />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="email">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z"/><path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z"/></svg>
+          Email address
+        </label>
+        <div class="input-wrap">
+          <input id="email" type="email" [(ngModel)]="email" name="email"
+            placeholder="you@example.com" autocomplete="email" required />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path fill-rule="evenodd" d="M8 7a4 4 0 118 0v1h1a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V9a1 1 0 011-1h1V7a4 4 0 014-4zm0 2a2 2 0 114 0v1H6V9h2V7z" clip-rule="evenodd"/></svg>
+          Password
+        </label>
+        <div class="input-wrap">
+          <input id="password" type="password" [(ngModel)]="password" name="password"
+            placeholder="Min. 6 characters" autocomplete="new-password" required />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" [class.loading]="loading" [disabled]="loading">
+        <span *ngIf="!loading" class="btn-content">
+          Create Account
+          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
+        </span>
+        <span *ngIf="loading" class="spinner"></span>
+      </button>
+    </form>
+
+    <p class="switch-link">
+      Already have an account?
+      <a routerLink="/login">Sign in</a>
+    </p>
+  </div>
+
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+</div>

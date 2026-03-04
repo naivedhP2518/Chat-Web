@@ -102,6 +102,4 @@ Chat App/
 
 ---
 
-## 📄 License
 
-MIT © 2024 ChatWave

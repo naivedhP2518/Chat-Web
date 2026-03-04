@@ -1,6 +1,3 @@
-<div align="center">
-
-<img src="assets/main-Page.png" alt="ChatWave Banner" width="100%"/>
 
 # 💬 ChatWave
 

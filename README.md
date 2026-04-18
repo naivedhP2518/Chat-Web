@@ -1,6 +1,3 @@
-<div align="center">
-
-<img src="assets/main-Page.png" alt="ChatWave Banner" width="100%"/>
 
 # 💬 ChatWave
 
@@ -100,7 +97,6 @@ Create `backend/.env` using the template in `.env.example`:
 | `MONGO_URI`  | MongoDB Atlas connection string | `mongodb+srv://...` |
 | `JWT_SECRET` | JWT signing secret              | `your_secret_key`   |
 
-> ⚠️ **Never commit `.env` to GitHub** — it contains sensitive credentials.
 
 ---
 
@@ -179,11 +175,6 @@ Chat-Web/
 | **Fonts**     | Google Fonts (Inter) | Premium typography              |
 
 ---
-
-## 📄 License
-
-MIT © 2024 **ChatWave** · Built with ❤️ using the MEAN Stack
-
 <div align="center">
-  <sub>⭐ Star this repo if you found it helpful!</sub>
+<sub>Built with ❤️ using the MEAN Stack</sub>
 </div>

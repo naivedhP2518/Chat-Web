@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { ThemeService } from '../../services/theme';
 
 @Component({
   selector: 'app-register',
@@ -19,7 +20,11 @@ export class RegisterComponent {
   success = '';
   loading = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    public themeService: ThemeService
+  ) {}
 
   register(): void {
     if (!this.username || !this.email || !this.password) {

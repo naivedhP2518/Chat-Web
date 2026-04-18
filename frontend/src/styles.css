@@ -1,21 +1,86 @@
 /* ── Google Font ── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 
-/* ── CSS Variables (Dark Mode) ── */
+/* ── CSS Variables (Light Mode Default) ── */
 :root {
-  --bg-primary:     #0d0f14;
-  --bg-secondary:   #13161d;
-  --glass-bg:       rgba(255, 255, 255, 0.04);
-  --border:         rgba(255, 255, 255, 0.08);
-  --input-bg:       rgba(255, 255, 255, 0.06);
+  --bg-primary:     #f8fafc;
+  --bg-secondary:   #ffffff;
+  --bg-gradient:    radial-gradient(circle at 50% -20%, rgba(99, 102, 241, 0.04), transparent);
+  --glass-bg:       rgba(255, 255, 255, 0.7);
+  --glass-auth:     rgba(255, 255, 255, 0.85);
+  --border:         rgba(0, 0, 0, 0.06);
+  --border-strong:  rgba(0, 0, 0, 0.12);
+  --input-bg:       rgba(0, 0, 0, 0.03);
+  --input-focus:    rgba(99, 102, 241, 0.1);
+  --input-border:   rgba(0, 0, 0, 0.1);
   --accent:         #6366f1;
-  --accent-light:   #a5b4fc;
+  --accent-light:   #818cf8;
   --gradient:       linear-gradient(135deg, #6366f1, #8b5cf6);
-  --text-primary:   #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted:     #475569;
-  --avatar-bg:      rgba(99, 102, 241, 0.2);
+  --text-primary:   #0f172a;
+  --text-secondary: #334155;
+  --text-muted:     #64748b;
+  --avatar-bg:      rgba(99, 102, 241, 0.12);
+  --hover-bg:       rgba(0, 0, 0, 0.04);
+  --active-bg:      rgba(99, 102, 241, 0.08);
+  --online-color:   #10b981;
+  --error-bg:       rgba(239, 68, 68, 0.1);
+  --error-border:   rgba(239, 68, 68, 0.25);
+  --error-text:     #ef4444;
+  --success-bg:     rgba(34, 197, 94, 0.1);
+  --success-border: rgba(34, 197, 94, 0.25);
+  --success-text:   #10b981;
+  --shadow-sm:      0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md:      0 8px 24px rgba(0,0,0,0.06);
+  --shadow-lg:      0 20px 40px rgba(0,0,0,0.08);
+  --menu-bg:        #ffffff;
+  --panel-bg:       #ffffff;
+  --btn-glass:      rgba(0, 0, 0, 0.04);
+  --scroll-thumb:   rgba(0, 0, 0, 0.15);
+  --skeleton-bg:      rgba(0, 0, 0, 0.06);
+  --skeleton-shimmer: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.03), transparent);
+  --font-main:      'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading:   'Poppins', system-ui, sans-serif;
+}
+
+/* ── Dark Mode ── */
+[data-theme="dark"] {
+  --bg-primary:     #0b0f1a;
+  --bg-secondary:   #121826;
+  --bg-gradient:    radial-gradient(circle at 50% -20%, rgba(99, 102, 241, 0.15), transparent);
+  --glass-bg:       rgba(18, 24, 38, 0.65);
+  --glass-auth:     rgba(18, 24, 38, 0.7);
+  --border:         rgba(255, 255, 255, 0.06);
+  --border-strong:  rgba(255, 255, 255, 0.12);
+  --input-bg:       rgba(255, 255, 255, 0.03);
+  --input-focus:    rgba(139, 92, 246, 0.15);
+  --input-border:   rgba(255, 255, 255, 0.08);
+  --accent:         #8b5cf6;
+  --accent-light:   #a78bfa;
+  --gradient:       linear-gradient(135deg, #6366f1, #8b5cf6);
+  --text-primary:   #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted:     #64748b;
+  --avatar-bg:      rgba(139, 92, 246, 0.2);
+  --hover-bg:       rgba(255, 255, 255, 0.04);
+  --active-bg:      rgba(139, 92, 246, 0.12);
   --online-color:   #22c55e;
+  --error-bg:       rgba(239, 68, 68, 0.12);
+  --error-border:   rgba(239, 68, 68, 0.25);
+  --error-text:     #fca5a5;
+  --success-bg:     rgba(34, 197, 94, 0.12);
+  --success-border: rgba(34, 197, 94, 0.25);
+  --success-text:   #86efac;
+  --shadow-sm:      0 4px 16px rgba(0,0,0,0.4);
+  --shadow-md:      0 8px 32px rgba(0,0,0,0.5);
+  --shadow-lg:      0 24px 64px rgba(0,0,0,0.6);
+  --menu-bg:        #121826;
+  --panel-bg:       #0b0f1a;
+  --btn-glass:      rgba(255, 255, 255, 0.05);
+  --scroll-thumb:   rgba(255, 255, 255, 0.1);
+  --skeleton-bg:      rgba(255, 255, 255, 0.05);
+  --skeleton-shimmer: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  --font-main:      'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading:   'Poppins', system-ui, sans-serif;
 }
 
 /* ── Reset & Base ── */
@@ -32,22 +97,55 @@ html, body {
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-main);
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(99, 102, 241, 0.12), transparent);
+  background-image: var(--bg-gradient);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar        { width: 5px; }
+::-webkit-scrollbar        { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb  { background: var(--scroll-thumb); border-radius: 10px; }
+::-webkit-scrollbar-corner { background: transparent; }
 
 /* ── Router outlet fills viewport ── */
 router-outlet + * {
   display: block;
   height: 100%;
+}
+
+/* ── Theme Toggle ── */
+.theme-toggle-fixed {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: var(--glass-auth);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  z-index: 100;
+  transition: transform 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+}
+
+.theme-toggle-fixed:hover {
+  color: var(--accent);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.icon-sun, .icon-moon {
+  width: 20px;
+  height: 20px;
 }

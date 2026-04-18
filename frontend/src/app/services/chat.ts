@@ -27,13 +27,23 @@ export class ChatService {
   }
 
   // Send a private message via socket
-  sendMessage(data: { senderId: string; receiverId: string; message: string; senderName: string }): void {
+  sendMessage(data: { senderId: string; receiverId: string; message: string; senderName: string; replyTo?: any }): void {
     this.socket.emit('sendMessage', data);
+  }
+
+  // Emit individual message deletion via socket
+  emitDeleteMessage(data: { messageId: string; receiverId: string }): void {
+    this.socket.emit('deleteMessage', data);
+  }
+
+  // Listen for message deletions
+  onMessageDeleted(callback: (data: { messageId: string }) => void): void {
+    this.socket.on('messageDeleted', callback);
   }
 
   // Listen for incoming messages
   onMessage(callback: (data: any) => void): void {
-    this.socket.on('receiveMessage', callback);
+    this.socket.on('onMessage', callback);
   }
 
   // Typing indicators
@@ -59,6 +69,13 @@ export class ChatService {
   }
 
   // REST API — get conversation history
+  getConversations(token: string): Observable<any[]> {
+    return this.http.get<any[]>(`${API_URL}/conversations`, {
+      headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
+    });
+  }
+
+  // REST API — get conversation history
   getHistory(userId: string, token: string): Observable<any[]> {
     return this.http.get<any[]>(`${API_URL}/${userId}`, {
       headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
@@ -66,8 +83,22 @@ export class ChatService {
   }
 
   // REST API — persist message to DB
-  saveMessage(data: { receiver: string; message: string }, token: string): Observable<any> {
+  saveMessage(data: { receiver: string; message: string; replyTo?: string }, token: string): Observable<any> {
     return this.http.post(API_URL, data, {
+      headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
+    });
+  }
+
+  // REST API — delete individual message from DB
+  deleteIndividualMessage(messageId: string, token: string): Observable<any> {
+    return this.http.delete(`${API_URL}/single/${messageId}`, {
+      headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
+    });
+  }
+
+  // REST API — clear chat history from DB
+  clearChatHistory(userId: string, token: string): Observable<any> {
+    return this.http.delete(`${API_URL}/${userId}`, {
       headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
     });
   }

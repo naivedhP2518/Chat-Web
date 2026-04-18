@@ -1,7 +1,10 @@
-<div class="chat-layout">
+<div class="chat-layout" [class.mobile-sidebar-open]="isMobileSidebarOpen">
+  
+  <!-- ── Mobile Overlay ── -->
+  <div class="sidebar-overlay" *ngIf="isMobileSidebarOpen" (click)="toggleMobileSidebar()"></div>
 
   <!-- ── Sidebar ── -->
-  <aside class="sidebar">
+  <aside class="sidebar" [class.open]="isMobileSidebarOpen">
     <div class="sidebar-header">
       <div class="current-user">
         <div class="avatar avatar-gradient">
@@ -11,86 +14,182 @@
           <span class="username-display">{{ currentUser?.username }}</span>
           <span class="status-badge">
             <span class="status-dot"></span>
-            Active
+            Online
           </span>
         </div>
       </div>
-      <button class="logout-btn" (click)="logout()" title="Sign out">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-      </button>
+      <div class="sidebar-actions" style="display: flex; gap: 0.25rem;">
+        <button class="icon-btn" (click)="themeService.toggleTheme()" [title]="themeService.getTheme() === 'dark' ? 'Light Mode' : 'Dark Mode'">
+          <svg *ngIf="themeService.getTheme() === 'dark'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg *ngIf="themeService.getTheme() === 'light'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <button class="logout-btn icon-btn" (click)="logout()" title="Sign out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
+    <!-- Search Bar -->
     <div class="search-bar">
-      <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" class="search-icon">
+      <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" class="search-icon">
         <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
       </svg>
-      <input type="text" placeholder="Search conversations..." class="search-input" readonly/>
+      <input type="text" placeholder="Search conversations..." class="search-input" [(ngModel)]="searchQuery" />
     </div>
 
     <div class="sidebar-section-title">
-      <svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12">
-        <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM6 8a2 2 0 11-4 0 2 2 0 014 0zM1.465 14.493A1.23 1.23 0 001.875 15.9 8.98 8.98 0 0010 18c2.33 0 4.47-.81 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 010 7.75"></path>
       </svg>
-      All Members
+      DIRECT MESSAGES
     </div>
 
     <div class="users-list">
-      <div *ngFor="let user of users" class="user-item"
-           [class.active]="selectedUser?._id === user._id"
-           (click)="selectUser(user)">
-        <div class="avatar-wrap">
-          <div class="avatar">{{ user.username?.charAt(0).toUpperCase() }}</div>
-          <span class="presence-dot" [class.is-online]="isOnline(user._id)"></span>
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="users-loading">
+        <div class="skeleton-item" *ngFor="let item of [1,2,3,4]">
+          <div class="skeleton-avatar"></div>
+          <div class="skeleton-details">
+            <div class="skeleton-line-top"></div>
+            <div class="skeleton-line-bottom"></div>
+          </div>
         </div>
-        <div class="user-info">
-          <span class="user-name">{{ user.username }}</span>
-          <span class="user-status-label">
-            <span class="status-indicator" [class.online]="isOnline(user._id)"></span>
-            {{ isOnline(user._id) ? 'Online' : 'Offline' }}
-          </span>
-        </div>
-        <svg *ngIf="selectedUser?._id === user._id" viewBox="0 0 20 20" fill="currentColor"
-             width="14" height="14" class="active-check">
-          <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/>
-        </svg>
       </div>
 
-      <div *ngIf="users.length === 0" class="no-users">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32" opacity="0.3">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
-        </svg>
-        <span>No members yet</span>
-      </div>
+      <!-- Users List -->
+      <ng-container *ngIf="!isLoading">
+        <div *ngFor="let user of users" class="user-item"
+             [class.active]="selectedUser?._id === user._id"
+             (click)="selectUser(user)">
+          
+          <!-- Avatar Section -->
+          <div class="avatar-wrap">
+            <div class="avatar">{{ user.username?.charAt(0).toUpperCase() }}</div>
+            <span class="presence-dot" [class.is-online]="isOnline(user._id)"></span>
+          </div>
+          
+          <!-- User Details Section -->
+          <div class="user-info">
+            <div class="user-top-row">
+              <span class="user-name">{{ user.username }}</span>
+              <span class="user-time">{{ user.lastMessageTime }}</span>
+            </div>
+            <div class="user-bottom-row">
+              <span class="user-msg-preview">{{ user.lastMessage }}</span>
+              <span class="unread-badge" *ngIf="user.unreadCount > 0">{{ user.unreadCount }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="users.length === 0" class="no-users">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40" opacity="0.3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+          </svg>
+          <span>No conversations yet.</span>
+        </div>
+      </ng-container>
     </div>
   </aside>
 
   <!-- ── Chat Panel ── -->
   <main class="chat-panel">
+    
+    <!-- Mobile Header Override -->
+    <div class="mobile-nav-header" *ngIf="!selectedUser">
+      <button class="icon-btn" (click)="toggleMobileSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <span>App Inbox</span>
+    </div>
 
     <!-- Empty state -->
     <div *ngIf="!selectedUser" class="empty-state">
-      <div class="empty-illustration">
-        <svg viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" width="120" height="100">
-          <rect x="5" y="10" width="70" height="50" rx="10" fill="rgba(99,102,241,0.12)" stroke="rgba(99,102,241,0.3)" stroke-width="1.5"/>
-          <rect x="8" y="18" width="30" height="3" rx="1.5" fill="rgba(99,102,241,0.3)"/>
-          <rect x="8" y="25" width="50" height="3" rx="1.5" fill="rgba(99,102,241,0.2)"/>
-          <rect x="8" y="32" width="42" height="3" rx="1.5" fill="rgba(99,102,241,0.2)"/>
-          <rect x="45" y="40" width="75" height="50" rx="10" fill="rgba(139,92,246,0.12)" stroke="rgba(139,92,246,0.3)" stroke-width="1.5"/>
-          <rect x="50" y="50" width="30" height="3" rx="1.5" fill="rgba(139,92,246,0.3)"/>
-          <rect x="50" y="57" width="60" height="3" rx="1.5" fill="rgba(139,92,246,0.2)"/>
-          <rect x="50" y="64" width="50" height="3" rx="1.5" fill="rgba(139,92,246,0.2)"/>
-          <circle cx="60" cy="85" r="5" fill="rgba(99,102,241,0.5)"/>
-          <circle cx="75" cy="85" r="5" fill="rgba(120,87,255,0.35)"/>
-          <circle cx="90" cy="85" r="5" fill="rgba(139,92,246,0.2)"/>
+      <div class="empty-illustration floating-anim">
+        <svg viewBox="0 0 180 150" fill="none" xmlns="http://www.w3.org/2000/svg" width="180" height="150" aria-hidden="true">
+          <defs>
+            <linearGradient id="panelGlow" x1="24" y1="18" x2="140" y2="132" gradientUnits="userSpaceOnUse">
+              <stop stop-color="var(--accent)" stop-opacity="0.22" />
+              <stop offset="1" stop-color="var(--accent-light)" stop-opacity="0.06" />
+            </linearGradient>
+            <linearGradient id="bubbleAccent" x1="0" y1="0" x2="1" y2="1">
+              <stop stop-color="var(--accent-light)" />
+              <stop offset="1" stop-color="var(--accent)" />
+            </linearGradient>
+            <filter id="softPanelShadow" x="-20%" y="-20%" width="140%" height="160%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="8" />
+              <feOffset dy="10" />
+              <feComponentTransfer>
+                <feFuncA type="linear" slope="0.16" />
+              </feComponentTransfer>
+              <feMerge>
+                <feMergeNode />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <circle cx="34" cy="34" r="18" fill="var(--avatar-bg)" />
+          <circle cx="151" cy="26" r="10" fill="var(--avatar-bg)" fill-opacity="0.65" />
+          <circle cx="145" cy="118" r="14" fill="var(--avatar-bg)" fill-opacity="0.55" />
+
+          <g filter="url(#softPanelShadow)" transform="translate(22 18)">
+            <rect x="0" y="0" width="136" height="104" rx="28" fill="var(--bg-secondary)" />
+            <rect x="0.75" y="0.75" width="134.5" height="102.5" rx="27.25" stroke="var(--border-strong)" stroke-width="1.5" />
+            <rect x="0" y="0" width="136" height="104" rx="28" fill="url(#panelGlow)" />
+
+            <circle cx="24" cy="24" r="7" fill="var(--accent)" fill-opacity="0.95" />
+            <circle cx="44" cy="24" r="7" fill="var(--accent)" fill-opacity="0.22" />
+            <circle cx="64" cy="24" r="7" fill="var(--accent)" fill-opacity="0.14" />
+
+            <rect x="18" y="46" width="64" height="20" rx="10" fill="var(--avatar-bg)" />
+            <rect x="32" y="53" width="36" height="6" rx="3" fill="var(--accent)" fill-opacity="0.58" />
+
+            <g transform="translate(70 38)">
+              <rect x="0" y="0" width="48" height="32" rx="16" fill="url(#bubbleAccent)" />
+              <rect x="14" y="10" width="20" height="4" rx="2" fill="white" fill-opacity="0.96" />
+              <rect x="10" y="18" width="28" height="4" rx="2" fill="white" fill-opacity="0.55" />
+            </g>
+
+            <g transform="translate(18 74)">
+              <rect x="0" y="0" width="82" height="14" rx="7" fill="var(--input-bg)" />
+              <rect x="10" y="4" width="44" height="6" rx="3" fill="var(--text-muted)" fill-opacity="0.3" />
+              <circle cx="68" cy="7" r="3" fill="var(--online-color)" />
+            </g>
+
+            <g transform="translate(108 76)">
+              <circle cx="8" cy="8" r="8" fill="var(--avatar-bg)" />
+              <path d="M5.2 8.1L7.2 10.1L11.3 6" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+          </g>
         </svg>
       </div>
-      <h2>Select a conversation</h2>
-      <p>Choose a member from the left panel to start messaging</p>
+      <h2>Click AnyWhere To Start Chatting</h2>
+      <p>Choose a member from the left panel to start messaging seamlessly.</p>
     </div>
 
     <!-- Active chat -->
@@ -98,10 +197,18 @@
 
       <!-- Chat header -->
       <div class="chat-header">
+        
+        <button class="mobile-back-btn icon-btn" (click)="selectedUser = null" title="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
         <div class="avatar-wrap">
           <div class="avatar">{{ selectedUser.username?.charAt(0).toUpperCase() }}</div>
           <span class="presence-dot" [class.is-online]="isOnline(selectedUser._id)"></span>
         </div>
+        
         <div class="header-info">
           <div class="chat-username">{{ selectedUser.username }}</div>
           <div class="chat-status-row">
@@ -112,44 +219,47 @@
               </div>
             </ng-container>
             <span *ngIf="!isTyping">
-              <svg viewBox="0 0 8 8" width="8" height="8">
-                <circle cx="4" cy="4" r="4" [attr.fill]="isOnline(selectedUser._id) ? '#22c55e' : '#475569'"/>
-              </svg>
-              {{ isOnline(selectedUser._id) ? 'Online' : 'Offline' }}
+              <span class="status-indicator" [class.online]="isOnline(selectedUser._id)"></span>
+              {{ isOnline(selectedUser._id) ? 'Online now' : 'Offline' }}
             </span>
           </div>
         </div>
 
         <div class="header-actions">
-          <!-- ① Three-dot menu button -->
+          <!-- Voice Call -->
+          <button class="icon-btn" title="Voice Call">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+          </button>
+          
+          <!-- Video Call -->
+          <button class="icon-btn" title="Video Call">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+              <polygon points="23 7 16 12 23 17 23 7"></polygon>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+            </svg>
+          </button>
+
+          <!-- More options -->
           <div class="menu-wrap">
             <button class="icon-btn" (click)="toggleMenu($event)" title="More options">
               <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
                 <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"/>
               </svg>
             </button>
-            <!-- Dropdown -->
             <div class="dropdown-menu" *ngIf="showMenu">
               <button class="dropdown-item" (click)="clearChat()">
-                <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15">
-                  <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line>
                 </svg>
                 Clear Chat
               </button>
               <button class="dropdown-item" (click)="copyUsername()">
-                <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15">
-                  <path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z"/>
-                  <path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                 </svg>
                 Copy Username
-              </button>
-              <div class="dropdown-divider"></div>
-              <button class="dropdown-item danger" (click)="logout()">
-                <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15">
-                  <path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clip-rule="evenodd"/>
-                  <path fill-rule="evenodd" d="M6 10a.75.75 0 01.75-.75h9.546l-1.048-.943a.75.75 0 111.004-1.114l2.5 2.25a.75.75 0 010 1.114l-2.5 2.25a.75.75 0 11-1.004-1.114l1.048-.943H6.75A.75.75 0 016 10z" clip-rule="evenodd"/>
-                </svg>
-                Sign Out
               </button>
             </div>
           </div>
@@ -158,27 +268,88 @@
 
       <!-- Messages area -->
       <div class="messages-area" #messagesContainer>
-        <div *ngIf="messages.length === 0" class="no-messages">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28" opacity="0.3">
+        <div *ngIf="messages.length === 0" class="no-messages floating-anim">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" opacity="0.15">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/>
           </svg>
-          <span>Start the conversation with {{ selectedUser.username }}</span>
+          <span style="font-weight: 500; font-size: 0.95rem; display: block; margin-top: 1rem;">Start the conversation with {{ selectedUser.username }}</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 0.4rem;">End-to-end secured.</span>
         </div>
 
         <div class="date-divider" *ngIf="messages.length > 0"><span>Today</span></div>
 
-        <div *ngFor="let msg of messages" class="bubble-row"
+        <div *ngFor="let msg of messages" class="bubble-row" [id]="'msg-' + msg._id"
              [class.mine]="isMine(msg)" [class.theirs]="!isMine(msg)">
           <div *ngIf="!isMine(msg)" class="bubble-avatar">
             {{ selectedUser.username?.charAt(0).toUpperCase() }}
           </div>
-          <div class="bubble">
-            <p class="bubble-text">{{ msg.message }}</p>
-            <div class="bubble-meta">
-              <span class="bubble-time">{{ msg.createdAt | date: 'HH:mm' }}</span>
-              <svg *ngIf="isMine(msg)" viewBox="0 0 16 16" fill="currentColor" width="12" height="12" class="read-icon">
-                <path d="M2.5 8.5l3 3 8-8M5.5 8.5l3 3"/>
-              </svg>
+          <div class="bubble-context-wrapper" (contextmenu)="onMessageContextMenu($event, msg)">
+            <div class="bubble" [class.is-deleted]="msg.isDeleted">
+              <!-- Quoted Message (Reply) -->
+              <div class="quoted-message" *ngIf="msg.replyTo && !msg.isDeleted" (click)="scrollToMessage(msg.replyTo._id)">
+                <div class="quoted-user">{{ msg.replyTo.sender?.username || 'User' }}</div>
+                <div class="quoted-text">{{ msg.replyTo.message }}</div>
+              </div>
+              <!-- Fallback for deleted reply targets -->
+              <div class="quoted-message stale-reply" *ngIf="!msg.replyTo && !msg.isDeleted && hasReplyId(msg)">
+                <div class="quoted-user">System</div>
+                <div class="quoted-text italic">Original message removed</div>
+              </div>
+
+              <p class="bubble-text">{{ msg.message }}</p>
+              
+              <div class="bubble-meta">
+                <span class="bubble-time">{{ msg.createdAt | date: 'HH:mm' }}</span>
+                <span
+                  *ngIf="isMine(msg) && !msg.isDeleted"
+                  class="message-status"
+                  [class.read]="getMessageStatus(msg) === 'read'"
+                  [attr.aria-label]="getMessageStatus(msg) === 'read' ? 'Read' : 'Sent'"
+                  [title]="getMessageStatus(msg) === 'read' ? 'Read' : 'Sent'"
+                >
+                  <svg viewBox="0 0 12 12" fill="none" aria-hidden="true" class="status-tick first">
+                    <path d="M1.75 6.25L4.55 9.05L10.25 3.35" />
+                  </svg>
+                  <svg
+                    *ngIf="getMessageStatus(msg) === 'read'"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    aria-hidden="true"
+                    class="status-tick second"
+                  >
+                    <path d="M1.75 6.25L4.55 9.05L10.25 3.35" />
+                  </svg>
+                </span>
+              </div>
+
+              <!-- Message Action Trigger (Visible on Hover) -->
+              <button class="msg-action-trigger" (click)="toggleMessageMenu($event, msg)" *ngIf="!msg.isDeleted">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+                  <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Individual Message Context Menu -->
+            <div class="msg-context-menu" *ngIf="activeMenuMessageId === msg._id" (click)="$event.stopPropagation()">
+              <button (click)="replyToMessage(msg)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                  <polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+                </svg>
+                Reply
+              </button>
+              <button (click)="copyMessageText(msg)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy
+              </button>
+              <button *ngIf="isMine(msg)" (click)="deleteMessage(msg._id)" class="delete-action">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                  <polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Delete
+              </button>
             </div>
           </div>
         </div>
@@ -191,32 +362,43 @@
         </div>
       </div>
 
+      <!-- Reply Preview Bar -->
+      <div class="reply-preview" *ngIf="replyingTo">
+        <div class="reply-content">
+          <div class="reply-indicator">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+            </svg>
+            Replying to <strong>{{ replyingTo.sender?.username }}</strong>
+          </div>
+          <div class="reply-text">{{ replyingTo.message }}</div>
+        </div>
+        <button class="cancel-reply" (click)="cancelReply()" title="Cancel reply">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
       <!-- Input bar -->
       <div class="input-bar">
 
-        <!-- Hidden file input -->
-        <input type="file" #fileInput style="display:none" (change)="onFileSelected($event)"
-               accept="image/*,.pdf,.doc,.docx,.txt,.zip"/>
+        <input type="file" #fileInput style="display:none" (change)="onFileSelected($event)" accept="image/*,.pdf,.doc,.docx,.txt,.zip"/>
+
+        <button class="attach-btn icon-btn" (click)="triggerFileInput($event)" title="Attach file">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+          </svg>
+        </button>
 
         <div class="input-wrap-bar">
-
-          <!-- ② Attach button -->
-          <button class="attach-btn" (click)="triggerFileInput($event)" title="Attach file">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-            </svg>
-          </button>
-
           <input type="text" class="message-input" [(ngModel)]="newMessage"
-                 placeholder="Type a message..." (keyup.enter)="sendMessage()" (input)="onTyping()"/>
+                 placeholder="Message {{selectedUser.username}}..." (keyup.enter)="sendMessage()" (input)="onTyping()"/>
 
-          <!-- ③ Emoji button + panel -->
+          <!-- Emoji button + panel -->
           <div class="emoji-panel-wrap">
-            <button class="emoji-stub-btn" (click)="toggleEmojiPanel($event)" title="Emoji"
-                    [class.active]="showEmojiPanel">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                   stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <button class="emoji-stub-btn icon-btn" (click)="toggleEmojiPanel($event)" title="Emoji" [class.active]="showEmojiPanel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
                 <line x1="9" y1="9" x2="9.01" y2="9"/>
@@ -226,35 +408,25 @@
 
             <!-- Emoji picker panel -->
             <div class="emoji-panel" *ngIf="showEmojiPanel">
-
-              <!-- Category tabs -->
               <div class="emoji-tabs">
-                <button
-                  *ngFor="let cat of emojiCategories; let i = index"
-                  class="emoji-tab"
-                  [class.active]="activeCategory === i"
-                  (click)="setCategory(i, $event)"
-                  [title]="cat.label"
-                >{{ cat.icon }}</button>
+                <button *ngFor="let cat of emojiCategories; let i = index" class="emoji-tab" [class.active]="activeCategory === i" (click)="setCategory(i, $event)" [title]="cat.label">
+                  {{ cat.icon }}
+                </button>
               </div>
-
-              <!-- Active category label -->
-              <div class="emoji-category-label">
-                {{ emojiCategories[activeCategory].label }}
-              </div>
-
-              <!-- Emoji grid -->
+              <div class="emoji-category-label">{{ emojiCategories[activeCategory].label }}</div>
               <div class="emoji-grid">
-                <button *ngFor="let emoji of activeEmojis" class="emoji-btn"
-                        (click)="insertEmoji(emoji, $event)">{{ emoji }}</button>
+                <button *ngFor="let emoji of activeEmojis" class="emoji-btn" (click)="insertEmoji(emoji, $event)">
+                  {{ emoji }}
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        <button class="send-btn" (click)="sendMessage()" [disabled]="!newMessage.trim()" title="Send">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-            <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z"/>
+        <button class="send-btn" (click)="sendMessage()" [disabled]="!newMessage.trim()" title="Send" aria-label="Send message">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21.25 3.75L10.75 14.25" />
+            <path d="M21.25 3.75L14.5 20.25L10.75 14.25L4.75 10.5L21.25 3.75Z" />
           </svg>
         </button>
       </div>

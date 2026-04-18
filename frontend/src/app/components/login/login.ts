@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { ThemeService } from '../../services/theme';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,11 @@ export class LoginComponent {
   error = '';
   loading = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    public themeService: ThemeService
+  ) {}
 
   login(): void {
     if (!this.email || !this.password) {
@@ -32,6 +37,7 @@ export class LoginComponent {
         this.router.navigate(['/chat']);
       },
       error: (err) => {
+        console.error('Login error details:', err);
         this.error = err.error?.message || 'Login failed. Please try again.';
         this.loading = false;
       },

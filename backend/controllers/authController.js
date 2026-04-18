@@ -43,18 +43,27 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
+    console.log(`[Login] Attempting login for email: ${email}`);
     const user = await User.findOne({ email });
+    
     if (!user) {
+      console.warn(`[Login] User not found for email: ${email}`);
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    console.log(`[Login] User found. Comparing passwords...`);
     const isMatch = await bcrypt.compare(password, user.password);
+    
     if (!isMatch) {
+      console.warn(`[Login] Password mismatch for email: ${email}`);
       return res.status(400).json({ message: "Invalid credentials" });
     }
+
+    console.log(`[Login] Success. Generating token for: ${user.username}`);
+    const userIdStr = user._id.toString();
 
     const token = jwt.sign(
-      { id: user._id, username: user.username, email: user.email },
+      { id: userIdStr, username: user.username, email: user.email },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -62,7 +71,7 @@ const login = async (req, res) => {
     res.json({
       token,
       user: {
-        id: user._id,
+        id: userIdStr,
         username: user.username,
         email: user.email,
       },

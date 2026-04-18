@@ -27,6 +27,9 @@ const io = socketio(server, {
   },
 });
 
+// Expose io to routes
+app.set("io", io);
+
 // Middleware
 app.use(cors({ origin: "http://localhost:4200", credentials: true }));
 app.use(express.json());
@@ -49,19 +52,9 @@ io.on("connection", (socket) => {
   // User comes online
   socket.on("userOnline", (userId) => {
     onlineUsers[userId] = socket.id;
+    socket.join(userId); // Join a room named after the userId for private broadcasts
     io.emit("onlineUsers", Object.keys(onlineUsers));
-    console.log("User online:", userId);
-  });
-
-  // Send a private message
-  socket.on("sendMessage", (data) => {
-    // Emit to receiver if online
-    const receiverSocketId = onlineUsers[data.receiverId];
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("receiveMessage", data);
-    }
-    // Also emit back to sender so local UI updates
-    socket.emit("receiveMessage", data);
+    console.log("User online and joined room:", userId);
   });
 
   // Typing indicator
@@ -84,12 +77,22 @@ io.on("connection", (socket) => {
     for (const userId in onlineUsers) {
       if (onlineUsers[userId] === socket.id) {
         delete onlineUsers[userId];
+        // Note: socket leaves rooms automatically on disconnect
         break;
       }
     }
     io.emit("onlineUsers", Object.keys(onlineUsers));
     console.log("Socket disconnected:", socket.id);
   });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error("[Unhandled Error]:", err);
+  if (err.name === "CastError") {
+    return res.status(400).json({ message: "Invalid ID format" });
+  }
+  res.status(500).json({ message: "Something went wrong on the server" });
 });
 
 const PORT = process.env.PORT || 5000;

@@ -1,6 +1,4 @@
-/* ── Auth shared styles (Login + Register) ── */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* ── Auth shared styles (Register) ── */
 
 .auth-wrapper {
   display: flex;
@@ -10,6 +8,7 @@
   background: var(--bg-primary);
   position: relative;
   overflow: hidden;
+  transition: background 0.3s ease;
 }
 
 /* Decorative orbs */
@@ -32,16 +31,16 @@
 }
 
 .auth-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--glass-auth);
+  border: 1px solid var(--border-strong);
   border-radius: 24px;
   padding: 2.5rem 2.2rem;
   width: 100%;
   max-width: 420px;
   backdrop-filter: blur(24px);
   box-shadow:
-    0 0 0 1px rgba(255,255,255,0.04) inset,
-    0 20px 60px rgba(0,0,0,0.5);
+    0 0 0 1px var(--border) inset,
+    var(--shadow-lg);
   animation: fadeUp 0.45s cubic-bezier(0.16,1,0.3,1);
   position: relative;
   z-index: 1;
@@ -72,7 +71,7 @@
 .brand-name {
   font-size: 1.55rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #a5b4fc, #c4b5fd);
+  background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -130,8 +129,8 @@
 .input-wrap input {
   width: 100%;
   padding: 0.72rem 1rem;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.09);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 12px;
   color: var(--text-primary);
   font-size: 0.92rem;
@@ -142,9 +141,9 @@
 }
 
 .input-wrap input:focus {
-  border-color: rgba(99,102,241,0.6);
-  background: rgba(99,102,241,0.06);
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+  border-color: var(--accent);
+  background: var(--input-focus);
+  box-shadow: 0 0 0 3px var(--input-focus);
 }
 
 .input-wrap input::placeholder {
@@ -156,7 +155,7 @@
 .btn-primary {
   width: 100%;
   padding: 0.78rem;
-  background: linear-gradient(135deg, #6366f1, #7c3aed);
+  background: var(--gradient);
   border: none;
   border-radius: 12px;
   color: #fff;
@@ -220,15 +219,15 @@
 }
 
 .alert.error {
-  background: rgba(239,68,68,0.1);
-  border: 1px solid rgba(239,68,68,0.25);
-  color: #fca5a5;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error-text);
 }
 
 .alert.success {
-  background: rgba(34,197,94,0.1);
-  border: 1px solid rgba(34,197,94,0.25);
-  color: #86efac;
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  color: var(--success-text);
 }
 
 /* Switch link */
@@ -240,12 +239,12 @@
 }
 
 .switch-link a {
-  color: #a5b4fc;
+  color: var(--accent);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s;
 }
 
 .switch-link a:hover {
-  color: #c7d2fe;
+  color: var(--accent-light);
 }
